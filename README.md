@@ -1,2 +1,3 @@
-# why-did-it-fail
-Public web tool that explains system failures by analyzing logs and identifying the most likely root cause.
+Why Did It Fail? is a public backend service that analyzes system logs and identifies the most likely root cause of failures.
+
+The service exposes a simple HTTP API and is intended to be consumed by a public web interface.
