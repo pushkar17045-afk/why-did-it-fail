@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Why Did It Fail?</title>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+    textarea {
+      width: 100%;
+      height: 220px;
+      font-family: monospace;
+    }
+    button {
+      margin-top: 12px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .result {
+      margin-top: 24px;
+      padding: 16px;
+      border-left: 4px solid #444;
+      background: #f9f9f9;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Why Did It Fail?</h1>
+<p>Paste system logs below and get a clear explanation of what failed first.</p>
+
+<textarea id="logs" placeholder="Paste logs here..."></textarea>
+<br>
+<button onclick="analyze()">Analyze</button>
+
+<div id="output" class="result" style="display:none;"></div>
+
+<script>
+async function analyze() {
+  const logs = document.getElementById("logs").value;
+  const output = document.getElementById("output");
+
+  output.style.display = "block";
+  output.innerHTML = "Analyzing…";
+
+  const res = await fetch(
+    "https://WHY-DID-IT-FAIL.onrender.com/analyze",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ logs })
+    }
+  );
+
+  const data = await res.json();
+
+  output.innerHTML = `
+    <strong>${data.summary}</strong><br><br>
+    ${data.root_cause || ""}<br><br>
+    Confidence: <b>${data.confidence}</b>
+  `;
+}
+</script>
+
+</body>
+</html>
