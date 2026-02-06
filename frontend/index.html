@@ -10,6 +10,10 @@
       margin: 40px auto;
       padding: 0 20px;
     }
+    <input type="file" id="fileInput" accept=".txt,.log" />
+<p style="font-size: 14px; color: #555;">
+You can paste logs or upload a .log / .txt file.
+</p>
     textarea {
       width: 100%;
       height: 220px;
@@ -42,28 +46,48 @@
 
 <script>
 async function analyze() {
-  const logs = document.getElementById("logs").value;
   const output = document.getElementById("output");
+  const textarea = document.getElementById("logs");
+  const fileInput = document.getElementById("fileInput");
+
+  let logs = textarea.value;
+
+  if (fileInput.files.length > 0) {
+    logs = await fileInput.files[0].text();
+  }
+
+  if (!logs.trim()) {
+    output.style.display = "block";
+    output.innerHTML = "Please paste logs or upload a file.";
+    return;
+  }
 
   output.style.display = "block";
-  output.innerHTML = "Analyzing…";
+  output.innerHTML = "Analyzing logs… this may take a moment.";
 
-  const res = await fetch(
-    "https://why-did-it-fail.onrender.com/analyze",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ logs })
-    }
-  );
+  try {
+    const res = await fetch(
+      "https://YOUR-BACKEND.onrender.com/analyze",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ logs })
+      }
+    );
 
-  const data = await res.json();
+    const data = await res.json();
 
-  output.innerHTML = `
-    <strong>${data.summary}</strong><br><br>
-    ${data.root_cause || ""}<br><br>
-    Confidence: <b>${data.confidence}</b>
-  `;
+    output.innerHTML = `
+      <strong>${data.summary}</strong><br><br>
+      ${data.root_cause ? `<pre>${data.root_cause}</pre>` : ""}
+      <br>
+      Confidence: <b>${data.confidence}</b>
+      <br><br>
+      <small>${data.note || ""}</small>
+    `;
+  } catch (e) {
+    output.innerHTML = "Something went wrong while analyzing the logs.";
+  }
 }
 </script>
 
